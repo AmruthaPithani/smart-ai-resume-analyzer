@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resume Analyzer Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ✅ IMPORTANT: Correct Flask static linking -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- 🔹 SIDEBAR -->
+    <div class="sidebar">
+        <h2>🧠 Resume Analyzer</h2>
+
+        <label>Role</label>
+        <select id="role">
+            <option value="developer">Developer</option>
+            <option value="data">Data Science</option>
+            <option value="web">Web Developer</option>
+        </select>
+
+        <label>Upload Resume</label>
+        <input type="file" id="file" accept="application/pdf">
+
+        <button onclick="analyzeResume()">🚀 Analyze</button>
+        <button onclick="downloadReport()">📄 Download PDF</button>
+
+        <br><br>
+        <a href="/logout" style="color:#aaa;">Logout</a>
+    </div>
+
+    <!-- 🔹 MAIN CONTENT -->
+    <div class="main">
+
+        <!-- Resume Preview -->
+        <div class="preview">
+            <iframe id="preview"></iframe>
+        </div>
+
+        <!-- Output -->
+        <div id="output" class="output">
+            <h3>📊 Results will appear here</h3>
+        </div>
+
+        <!-- History -->
+        <div class="history">
+            <h3>📈 Score History</h3>
+            <canvas id="historyChart"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+<!-- Chart Script -->
+<script>
+    const scores = {{ scores | tojson }};
+
+    if (scores.length > 0) {
+        const ctx = document.getElementById('historyChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: scores.map((_, i) => "Attempt " + (i + 1)),
+                datasets: [{
+                    label: 'Score Trend',
+                    data: scores,
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34,197,94,0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

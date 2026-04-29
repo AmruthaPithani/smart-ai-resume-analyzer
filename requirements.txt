@@ -1,0 +1,6 @@
+flask
+gunicorn
+werkzeug
+pymupdf
+reportlab
+openai
