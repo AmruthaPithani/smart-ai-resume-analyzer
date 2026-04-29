@@ -258,5 +258,4 @@ def download():
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    print("🚀 Flask running...")
-    app.run(debug=True)
+    app.run()
