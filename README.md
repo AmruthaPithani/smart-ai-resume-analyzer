@@ -144,8 +144,7 @@ gunicorn app:app
 ---
 
 ## 🌐 Live Demo
-https://your-app.onrender.com
-
+https://smart-ai-resume-analyzer-u8ip.onrender.com/login
 ---
 
 ## 👩‍💻 Author
