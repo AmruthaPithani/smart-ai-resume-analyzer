@@ -15,6 +15,25 @@ print("🔥 App is starting...")
 
 # ---------------- DB ----------------
 def init_db():
+    def create_demo_user():
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+
+        c.execute(
+            "SELECT * FROM users WHERE username=?",
+            ("demo",)
+        )
+        if not c.fetchone():
+            c.execute(
+                "INSERT INTO users(username,password) VALUES(?,?)",
+                (
+                    "demo",
+                     generate_password_hash("demo123")
+                )
+            )
+            conn.commit()
+            conn.close()
+    create_demo_user()
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
 
@@ -108,6 +127,45 @@ def generate_ai_suggestions(text, role, missing):
         suggestions.append("Your resume looks strong. Consider refining formatting and clarity.")
 
     return " • " + "\n • ".join(suggestions)
+# ---------------- Interview Question Generator ----------------
+def generate_interview_questions(found):
+
+    questions = []
+
+    for skill in found:
+
+        questions.append(
+            f"Explain a project where you used {skill}."
+        )
+
+        questions.append(
+            f"What challenges did you face while using {skill}?"
+        )
+
+    return questions[:8]
+# ---------------- Anomoly Detection ----------------
+  
+def detect_anomalies(text):
+
+    alerts = []
+
+    if "experience" not in text:
+        alerts.append(
+            "No experience section detected"
+        )
+
+    if "project" not in text:
+        alerts.append(
+            "No projects section detected"
+        )
+
+    if "@" not in text:
+        alerts.append(
+            "Contact details missing"
+        )
+
+    return alerts
+
 
 # ---------------- GRADE ----------------
 def get_grade(score):
@@ -208,6 +266,8 @@ def analyze():
         ats = calculate_ats(text, skills, found)
         grade = get_grade(score)
         suggestion = generate_ai_suggestions(text, role, missing)
+        questions = generate_interview_questions(found)
+        alerts = detect_anomalies(text)
 
         conn = sqlite3.connect("users.db")
         c = conn.cursor()
@@ -225,6 +285,8 @@ def analyze():
             "found": found,
             "missing": missing,
             "suggestion": suggestion
+            "questions": questions,
+            "alerts": alerts
         })
 
     except Exception as e:
