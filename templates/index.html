@@ -82,7 +82,7 @@ href="{{ url_for('static', filename='style.css') }}">
         <label style="margin-top:15px;display:block;">Job Description</label>
         <textarea
             id="jobDescription"
-            rows="6"
+            rows="10"
             placeholder="Paste job description here..."
             style="
             width:100%;
@@ -95,7 +95,7 @@ href="{{ url_for('static', filename='style.css') }}">
             
             </textarea>
         <button onclick="analyzeResume()">Analyze Resume</button>
-        
+        <button onclick="downloadReport()">Download Report</button>
 
         <br><br>
 
@@ -163,16 +163,23 @@ href="{{ url_for('static', filename='style.css') }}">
         <!-- RESULTS -->
 
         <div id="output" class="output">
-
-            <h3>
-                Upload a resume and click Analyze
-            </h3>
-
-            <p>
-                Resume intelligence insights
-                will appear here.
-            </p>
-
+            <div class="result-card">
+                <h3>
+                    Resume Intelligence Insights
+                </h3>
+                <p>Upload your resume and optionally paste a job description.
+                    The platform will perform:
+                </p>
+                <ul>
+                    <li>ATS Analysis</li>
+                    <li>Skill Gap Detection</li>
+                    <li>Job Description Matching</li>
+                    <li>Role Prediction</li>
+                    <li>Resume Section Analysis</li>
+                    <li>Interview Question Generation</li>
+                    <li>Anomaly Detection</li>
+                </ul>
+            </div>
         </div>
 
         <!-- ANALYTICS -->
@@ -197,6 +204,12 @@ href="{{ url_for('static', filename='style.css') }}">
 
                 <canvas id="historyChart"></canvas>
 
+            </div>
+            <div class="chart-card">
+                <h3>
+                    Resume Strength Analysis
+                </h3>
+                <canvas id="radarChart"></canvas>
             </div>
 
         </div>
