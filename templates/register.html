@@ -1,26 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Register</title>
-  <link rel="stylesheet" href="/static/style.css">
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Register | Smart AI Resume Analyzer</title>
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
 </head>
+
 <body>
 
 <div class="app">
-  <h2>📝 Register</h2>
 
-  {% if error %}
-    <div class="error">{{ error }}</div>
-  {% endif %}
+    <div style="text-align:center">
 
-  <form method="POST">
-    <input name="username" placeholder="Username" required>
-    <input name="password" type="password" placeholder="Password" required>
-    <button type="submit">Register</button>
-  </form>
+        <div style="font-size:60px;">
+            🚀
+        </div>
 
-  <p>Already have account? <a href="/login">Login</a></p>
+        <h2>
+            Create Account
+        </h2>
+
+        <p style="
+        color:#64748b;
+        margin-bottom:25px;
+        ">
+        Start analyzing resumes using AI
+        </p>
+
+    </div>
+
+    {% if error %}
+    <div class="error">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST">
+
+        <input
+        name="username"
+        placeholder="Choose Username"
+        required>
+
+        <input
+        name="password"
+        type="password"
+        placeholder="Choose Password"
+        required>
+
+        <button type="submit">
+
+            Register
+
+        </button>
+
+    </form>
+
+    <p>
+
+        Already have an account?
+
+        <a href="/login">
+
+            Login
+
+        </a>
+
+    </p>
+
 </div>
 
 </body>
+
 </html>
