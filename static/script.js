@@ -1,47 +1,360 @@
 let lastData = null;
+let skillChart = null;
+
+// ---------------- PREVIEW PDF ----------------
 
 document.getElementById("file").onchange = function () {
-  document.getElementById("preview").src =
-    URL.createObjectURL(this.files[0]);
+
+    const file = this.files[0];
+
+    if(file){
+
+        document
+        .getElementById("preview")
+        .src = URL.createObjectURL(file);
+
+    }
+
 };
 
-async function analyzeResume() {
-  let file = document.getElementById("file").files[0];
-  let role = document.getElementById("role").value;
+// ---------------- ANALYZE ----------------
 
-  let fd = new FormData();
-  fd.append("file", file);
-  fd.append("role", role);
+async function analyzeResume(){
 
-  let res = await fetch("/analyze", { method: "POST", body: fd });
-  let data = await res.json();
+    const file =
+    document.getElementById("file").files[0];
 
-  if (!res.ok) return alert(data.error);
+    const role =
+    document.getElementById("role").value;
 
-  lastData = data;
+    if(!file){
 
-  document.getElementById("output").innerHTML = `
-    <h2>Score: ${data.score}%</h2>
-    <h3>ATS: ${data.ats}%</h3>
-    <h3>Grade: ${data.grade}</h3>
-    <p>Found: ${data.found.join(", ")}</p>
-    <p>Missing: ${data.missing.join(", ")}</p>
-    <p><b>AI Suggestions:</b> ${data.suggestion}</p>
-  `;
+        alert("Please upload a resume.");
+
+        return;
+    }
+
+    const btn =
+    document.querySelector(".sidebar button");
+
+    btn.disabled = true;
+
+    btn.innerText = "Analyzing...";
+
+    document.getElementById("output").innerHTML = `
+    
+    <div class="result-card">
+    
+    <h3>🤖 AI Analysis In Progress</h3>
+    
+    <p>
+    Extracting resume data...
+    Matching skills...
+    Calculating ATS score...
+    Generating recommendations...
+    </p>
+    
+    </div>
+    
+    `;
+
+    try{
+
+        let fd = new FormData();
+
+        fd.append("file", file);
+
+        fd.append("role", role);
+
+        let res = await fetch("/analyze", {
+
+            method:"POST",
+
+            body:fd
+
+        });
+
+        let data = await res.json();
+
+        if(!res.ok){
+
+            alert(data.error);
+
+            return;
+        }
+
+        lastData = data;
+
+        // ---------------- KPI CARDS ----------------
+
+        document
+        .getElementById("scoreCard")
+        .innerText =
+        data.score + "%";
+
+        document
+        .getElementById("atsCard")
+        .innerText =
+        data.ats + "%";
+
+        document
+        .getElementById("gradeCard")
+        .innerText =
+        data.grade;
+
+        document
+        .getElementById("skillCount")
+        .innerText =
+        data.found.length;
+
+        // ---------------- SKILLS ----------------
+
+        const foundSkills =
+        data.found
+        .map(skill =>
+        `<span class="skill found">${skill}</span>`)
+        .join("");
+
+        const missingSkills =
+        data.missing
+        .map(skill =>
+        `<span class="skill missing">${skill}</span>`)
+        .join("");
+
+        // ---------------- QUESTIONS ----------------
+
+        const questionsHtml =
+        (data.questions || [])
+        .map(q =>
+        `<li>${q}</li>`)
+        .join("");
+
+        // ---------------- ALERTS ----------------
+
+        const alertsHtml =
+        (data.alerts || [])
+        .map(a =>
+        `<li>${a}</li>`)
+        .join("");
+
+        // ---------------- OUTPUT ----------------
+
+        document.getElementById("output").innerHTML = `
+
+        <div class="result-card">
+
+            <h3>📊 Resume Analysis Summary</h3>
+
+            <p>
+            Resume Score:
+            <strong>${data.score}%</strong>
+            </p>
+
+            <p>
+            ATS Score:
+            <strong>${data.ats}%</strong>
+            </p>
+
+            <p>
+            Grade:
+            <strong>${data.grade}</strong>
+            </p>
+
+        </div>
+
+        <div class="result-card">
+
+            <h3>✅ Matched Skills</h3>
+
+            <div>
+
+            ${foundSkills}
+
+            </div>
+
+        </div>
+
+        <div class="result-card">
+
+            <h3>❌ Missing Skills</h3>
+
+            <div>
+
+            ${missingSkills}
+
+            </div>
+
+        </div>
+
+        <div class="result-card">
+
+            <h3>🧠 AI Recommendations</h3>
+
+            <p>
+
+            ${data.suggestion
+            .replace(/\n/g,"<br>")}
+
+            </p>
+
+        </div>
+
+        <div class="result-card">
+
+            <h3>🎤 Interview Questions</h3>
+
+            <ul>
+
+            ${questionsHtml}
+
+            </ul>
+
+        </div>
+
+        <div class="result-card">
+
+            <h3>🚨 Resume Anomaly Detection</h3>
+
+            <ul>
+
+            ${
+                alertsHtml ||
+                "<li>No major issues detected.</li>"
+            }
+
+            </ul>
+
+        </div>
+
+        `;
+
+        // ---------------- CHART ----------------
+
+        createSkillChart(
+            data.found.length,
+            data.missing.length
+        );
+
+    }
+
+    catch(err){
+
+        console.log(err);
+
+        alert("Something went wrong.");
+
+    }
+
+    finally{
+
+        btn.disabled = false;
+
+        btn.innerText =
+        "🚀 Analyze Resume";
+    }
+
 }
 
-async function downloadReport() {
-  if (!lastData) return alert("Analyze first");
+// ---------------- SKILL CHART ----------------
 
-  let res = await fetch("/download", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(lastData)
-  });
+function createSkillChart(found, missing){
 
-  let blob = await res.blob();
-  let a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "report.pdf";
-  a.click();
+    const ctx =
+    document
+    .getElementById("skillChart");
+
+    if(skillChart){
+
+        skillChart.destroy();
+
+    }
+
+    skillChart = new Chart(ctx,{
+
+        type:"doughnut",
+
+        data:{
+
+            labels:[
+                "Matched Skills",
+                "Missing Skills"
+            ],
+
+            datasets:[{
+
+                data:[
+                    found,
+                    missing
+                ],
+
+                backgroundColor:[
+                    "#22c55e",
+                    "#ef4444"
+                ]
+
+            }]
+
+        },
+
+        options:{
+
+            responsive:true,
+
+            plugins:{
+
+                legend:{
+                    position:"bottom"
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+// ---------------- DOWNLOAD REPORT ----------------
+
+async function downloadReport(){
+
+    if(!lastData){
+
+        alert(
+            "Analyze a resume first."
+        );
+
+        return;
+    }
+
+    let res =
+    await fetch("/download",{
+
+        method:"POST",
+
+        headers:{
+
+            "Content-Type":
+            "application/json"
+
+        },
+
+        body:
+        JSON.stringify(lastData)
+
+    });
+
+    let blob =
+    await res.blob();
+
+    let a =
+    document.createElement("a");
+
+    a.href =
+    URL.createObjectURL(blob);
+
+    a.download =
+    "resume_report.pdf";
+
+    a.click();
 }
