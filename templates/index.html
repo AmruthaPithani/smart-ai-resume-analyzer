@@ -74,20 +74,28 @@ href="{{ url_for('static', filename='style.css') }}">
 
         </select>
 
-        <label>Upload Resume</label>
-
-        <input
-        type="file"
-        id="file"
-        accept="application/pdf">
-
-        <button onclick="analyzeResume()">
-            🚀 Analyze Resume
-        </button>
-
-        <button onclick="downloadReport()">
-            📄 Download Report
-        </button>
+       <label>Upload Resume</label>
+        <input 
+            type="file"
+            id="file"
+            accept="application/pdf">
+        <label style="margin-top:15px;display:block;">Job Description</label>
+        <textarea
+            id="jobDescription"
+            rows="6"
+            placeholder="Paste job description here..."
+            style="
+            width:100%;
+            padding:12px;
+            border:1px solid #d1d5db;
+            border-radius:12px;
+            resize:vertical;
+            font-family:inherit;
+            margin-bottom:15px;">
+            
+            </textarea>
+        <button onclick="analyzeResume()">Analyze Resume</button>
+        
 
         <br><br>
 
@@ -138,7 +146,7 @@ href="{{ url_for('static', filename='style.css') }}">
             </div>
 
             <div class="card">
-                <h2 id="skillCount">0</h2>
+                <h2 id="skillCount">0%</h2>
                 <p>Skills Found</p>
             </div>
 
