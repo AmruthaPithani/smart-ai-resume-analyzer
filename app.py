@@ -15,25 +15,7 @@ print("🔥 App is starting...")
 
 # ---------------- DB ----------------
 def init_db():
-    def create_demo_user():
-        conn = sqlite3.connect("users.db")
-        c = conn.cursor()
 
-        c.execute(
-            "SELECT * FROM users WHERE username=?",
-            ("demo",)
-        )
-        if not c.fetchone():
-            c.execute(
-                "INSERT INTO users(username,password) VALUES(?,?)",
-                (
-                    "demo",
-                     generate_password_hash("demo123")
-                )
-            )
-            conn.commit()
-            conn.close()
-    create_demo_user()
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
 
@@ -56,7 +38,40 @@ def init_db():
     conn.commit()
     conn.close()
 
+
+def create_demo_user():
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+
+    # Check if demo user exists
+    c.execute(
+        "SELECT * FROM users WHERE username=?",
+        ("demo",)
+    )
+
+    user = c.fetchone()
+
+    # Create demo user only if it doesn't exist
+    if not user:
+
+        c.execute(
+            "INSERT INTO users(username,password) VALUES(?,?)",
+            (
+                "demo",
+                generate_password_hash("demo123")
+            )
+        )
+
+    conn.commit()
+    conn.close()
+
+
+# Run database initialization first
 init_db()
+
+# Then create demo account
+create_demo_user()
 
 # ---------------- PDF SAFE ----------------
 def extract_text(file):
