@@ -66,6 +66,8 @@ async function analyzeResume(){
 
         fd.append("role", role);
 
+        fd.append("job_description",document.getElementById("jobDescription").value);
+
         let res = await fetch("/analyze", {
 
             method:"POST",
@@ -105,7 +107,7 @@ async function analyzeResume(){
         document
         .getElementById("skillCount")
         .innerText =
-        data.found.length;
+        data.found.length+"%";
 
         // ---------------- SKILLS ----------------
 
@@ -136,98 +138,178 @@ async function analyzeResume(){
         .map(a =>
         `<li>${a}</li>`)
         .join("");
+        // ---------------- RESUME SECTION ANALYSIS ----------------
+        const sectionsHtml =
+            Object.entries(
+                data.sections || {}
+            )
+            .map(
+                ([name,status]) =>
+                    `<li>${status ? "✅" : "❌"}${name}</li>`
+            )
+            .join("");
+
 
         // ---------------- OUTPUT ----------------
 
         document.getElementById("output").innerHTML = `
-
         <div class="result-card">
 
-            <h3>📊 Resume Analysis Summary</h3>
+    <h3>📊 Resume Analysis Summary</h3>
 
-            <p>
-            Resume Score:
-            <strong>${data.score}%</strong>
-            </p>
+    <p>
+        Resume Score:
+        <strong>${data.score}%</strong>
+    </p>
 
-            <p>
-            ATS Score:
-            <strong>${data.ats}%</strong>
-            </p>
+    <p>
+        ATS Score:
+        <strong>${data.ats}%</strong>
+    </p>
 
-            <p>
-            Grade:
-            <strong>${data.grade}</strong>
-            </p>
+    <p>
+        Grade:
+        <strong>${data.grade}</strong>
+    </p>
 
-        </div>
+</div>
 
-        <div class="result-card">
+<div class="result-card">
 
-            <h3>✅ Matched Skills</h3>
+    <h3>🤖 AI Role Prediction</h3>
 
-            <div>
+    <p>
 
-            ${foundSkills}
+        Predicted Role:
 
-            </div>
+        <strong>
 
-        </div>
+        ${data.predicted_role || "Not Available"}
 
-        <div class="result-card">
+        </strong>
 
-            <h3>❌ Missing Skills</h3>
+    </p>
 
-            <div>
+    <p>
 
-            ${missingSkills}
+        Confidence:
 
-            </div>
+        ${data.prediction_confidence || 0}%
 
-        </div>
+    </p>
 
-        <div class="result-card">
+</div>
 
-            <h3>🧠 AI Recommendations</h3>
+<div class="result-card">
 
-            <p>
+    <h3>🎯 Job Description Match</h3>
 
-            ${data.suggestion
-            .replace(/\n/g,"<br>")}
+    <p>
 
-            </p>
+        Match Score:
 
-        </div>
+        <strong>
 
-        <div class="result-card">
+        ${data.jd_score || 0}%
 
-            <h3>🎤 Interview Questions</h3>
+        </strong>
 
-            <ul>
+    </p>
 
-            ${questionsHtml}
+    <p>
 
-            </ul>
+        Matched Keywords:
 
-        </div>
+        ${(data.jd_matched || []).join(", ") || "None"}
 
-        <div class="result-card">
+    </p>
 
-            <h3>🚨 Resume Anomaly Detection</h3>
+    <p>
 
-            <ul>
+        Missing Keywords:
 
-            ${
-                alertsHtml ||
-                "<li>No major issues detected.</li>"
-            }
+        ${(data.jd_missing || []).join(", ") || "None"}
 
-            </ul>
+    </p>
 
-        </div>
+</div>
 
-        `;
+<div class="result-card">
 
+    <h3>✅ Matched Skills</h3>
+
+    <div>
+
+        ${foundSkills}
+
+    </div>
+
+</div>
+
+<div class="result-card">
+
+    <h3>❌ Missing Skills</h3>
+
+    <div>
+
+        ${missingSkills}
+
+    </div>
+
+</div>
+
+<div class="result-card">
+
+    <h3>🧠 AI Recommendations</h3>
+
+    <p>
+
+        ${data.suggestion
+        .replace(/\n/g,"<br>")}
+
+    </p>
+
+</div>
+
+<div class="result-card">
+
+    <h3>🎤 Interview Questions</h3>
+
+    <ul>
+
+        ${questionsHtml}
+
+    </ul>
+
+</div>
+
+<div class="result-card">
+
+    <h3>🚨 Resume Anomaly Detection</h3>
+
+    <ul>
+
+        ${
+            alertsHtml ||
+            "<li>No major issues detected.</li>"
+        }
+
+    </ul>
+
+</div>
+
+<div class="result-card">
+
+    <h3>📋 Resume Section Analysis</h3>
+
+    <ul>
+
+        ${sectionsHtml || "<li>No section data available</li>"}
+
+    </ul>
+
+</div>
+        
         // ---------------- CHART ----------------
 
         createSkillChart(
