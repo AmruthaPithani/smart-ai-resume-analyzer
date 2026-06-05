@@ -1,5 +1,6 @@
 let lastData = null;
 let skillChart = null;
+let radarChart = null;
 
 // ---------------- PREVIEW PDF ----------------
 
@@ -154,161 +155,50 @@ async function analyzeResume(){
 
         document.getElementById("output").innerHTML = `
         <div class="result-card">
-
-    <h3>📊 Resume Analysis Summary</h3>
-
-    <p>
-        Resume Score:
-        <strong>${data.score}%</strong>
-    </p>
-
-    <p>
-        ATS Score:
-        <strong>${data.ats}%</strong>
-    </p>
-
-    <p>
-        Grade:
-        <strong>${data.grade}</strong>
-    </p>
-
-</div>
-
-<div class="result-card">
-
-    <h3>🤖 AI Role Prediction</h3>
-
-    <p>
-
-        Predicted Role:
-
-        <strong>
-
-        ${data.predicted_role || "Not Available"}
-
-        </strong>
-
-    </p>
-
-    <p>
-
-        Confidence:
-
-        ${data.prediction_confidence || 0}%
-
-    </p>
-
-</div>
-
-<div class="result-card">
-
-    <h3>🎯 Job Description Match</h3>
-
-    <p>
-
-        Match Score:
-
-        <strong>
-
-        ${data.jd_score || 0}%
-
-        </strong>
-
-    </p>
-
-    <p>
-
-        Matched Keywords:
-
-        ${(data.jd_matched || []).join(", ") || "None"}
-
-    </p>
-
-    <p>
-
-        Missing Keywords:
-
-        ${(data.jd_missing || []).join(", ") || "None"}
-
-    </p>
-
-</div>
-
-<div class="result-card">
-
-    <h3>✅ Matched Skills</h3>
-
-    <div>
-
-        ${foundSkills}
-
-    </div>
-
-</div>
-
-<div class="result-card">
-
-    <h3>❌ Missing Skills</h3>
-
-    <div>
-
-        ${missingSkills}
-
-    </div>
-
-</div>
-
-<div class="result-card">
-
-    <h3>🧠 AI Recommendations</h3>
-
-    <p>
-
-        ${data.suggestion
-        .replace(/\n/g,"<br>")}
-
-    </p>
-
-</div>
-
-<div class="result-card">
-
-    <h3>🎤 Interview Questions</h3>
-
-    <ul>
-
-        ${questionsHtml}
-
-    </ul>
-
-</div>
-
-<div class="result-card">
-
-    <h3>🚨 Resume Anomaly Detection</h3>
-
-    <ul>
-
-        ${
+        <h3>📊 Resume Analysis Summary</h3>
+        <p>Resume Score:<strong>${data.score}%</strong></p>
+        <p>ATS Score:<strong>${data.ats}%</strong></p>
+        <p>Grade:<strong>${data.grade}</strong></p>
+        </div>
+        <div class="result-card">
+        <h3>🤖 AI Role Prediction</h3>
+        <p>Predicted Role:<strong>${data.predicted_role || "Not Available"}</strong></p>
+        <p>Confidence:${data.prediction_confidence || 0}%</p>
+        </div>
+        <div class="result-card">
+        <h3>🎯 Job Description Match</h3>
+        <p>Match Score:<strong>${data.jd_score || 0}%</strong></p>
+        <p>Matched Keywords:${(data.jd_matched || []).join(", ") || "None"}</p>
+        <p>Missing Keywords:${(data.jd_missing || []).join(", ") || "None"}</p>
+        </div>
+        <div class="result-card">
+        <h3>✅ Matched Skills</h3>
+        <div>${foundSkills}</div>
+        </div>
+        <div class="result-card">
+        <h3>❌ Missing Skills</h3>
+        <div>${missingSkills}</div>
+        </div>
+        <div class="result-card">
+        <h3>🧠 AI Recommendations</h3>
+        <p>${data.suggestion.replace(/\n/g,"<br>")}</p>
+        </div>
+        <div class="result-card">
+        <h3>🎤 Interview Questions</h3>
+        <ul>${questionsHtml}</ul>
+        </div>
+        <div class="result-card">
+        <h3>Resume Anomaly Detection</h3>
+        <ul>${
             alertsHtml ||
             "<li>No major issues detected.</li>"
         }
-
-    </ul>
-
-</div>
-
-<div class="result-card">
-
-    <h3>📋 Resume Section Analysis</h3>
-
-    <ul>
-
-        ${sectionsHtml || "<li>No section data available</li>"}
-
-    </ul>
-
-</div>
+        </ul>
+        </div>
+        <div class="result-card">
+        <h3>📋 Resume Section Analysis</h3>
+        <ul>${sectionsHtml || "<li>No section data available</li>"}</ul>
+        </div>
         
         // ---------------- CHART ----------------
 
@@ -316,6 +206,7 @@ async function analyzeResume(){
             data.found.length,
             data.missing.length
         );
+        createRadarChart(data);
 
     }
 
@@ -389,6 +280,75 @@ function createSkillChart(found, missing){
                 }
 
             }
+
+        }
+
+    });
+
+}
+// ---------------- RADAR CHART ----------------
+function createRadarChart(data){
+
+    const ctx =
+    document.getElementById(
+        "radarChart"
+    );
+
+    if(!ctx) return;
+
+    if(radarChart){
+
+        radarChart.destroy();
+
+    }
+
+    radarChart =
+    new Chart(ctx,{
+
+        type:"radar",
+
+        data:{
+
+            labels:[
+
+                "Skills",
+
+                "Projects",
+
+                "Experience",
+
+                "ATS",
+
+                "Resume Score"
+
+            ],
+
+            datasets:[{
+
+                label:
+                "Resume Strength",
+
+                data:[
+
+                    data.score,
+
+                    75,
+
+                    70,
+
+                    data.ats,
+
+                    data.score
+
+                ]
+
+            }]
+
+        },
+
+        options:{
+
+            responsive:true
 
         }
 
