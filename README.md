@@ -18,23 +18,23 @@ Smart AI Resume Analyzer is a full-stack AI-powered web application designed to 
 
 ## Login Page
 
-![Login Page](assets/login.png)
+![Login Page](images/login-page.png)
 
 ## AI Resume Intelligence Dashboard
 
-![Dashboard](assets/dashboard.png)
+![Dashboard](images/dashboard-overview.png)
 
 ## Resume Analysis Results
 
-![Analysis Results](assets/analysis.png)
+![Analysis Results](images/analysis-results.png)
 
 ## Analytics Dashboard
 
-![Analytics](assets/charts.png)
+![Analytics](images/analytics-dashboard.png)
 
-## PDF Report
+## Resume Strength Analysis
 
-![PDF Report](assets/report.png)
+![Resume Strength](images/radar-analysis.png)
 
 ---
 
