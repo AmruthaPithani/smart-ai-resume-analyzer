@@ -376,8 +376,7 @@ def analyze():
         )
         conn.commit()
         conn.close()
-
-       return jsonify({
+        return jsonify({
            "score": score,
            "ats": ats,
            "grade": grade,
