@@ -1,91 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Resume Analyzer Pro</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- ✅ IMPORTANT: Correct Flask static linking -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Smart AI Resume Analyzer</title>
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
 
 <div class="container">
 
-    <!-- 🔹 SIDEBAR -->
-    <div class="sidebar">
-        <h2>🧠 Resume Analyzer</h2>
+    <!-- SIDEBAR -->
 
-        <label>Role</label>
+    <div class="sidebar">
+
+        <div class="logo">
+            🧠
+        </div>
+
+        <h2>Resume Intelligence</h2>
+
+        <div style="
+        background:#eff6ff;
+        padding:12px;
+        border-radius:12px;
+        margin-bottom:20px;
+        ">
+
+        <strong>Demo Account</strong>
+        <br>
+        Username: demo
+        <br>
+        Password: demo123
+
+        </div>
+
+        <label>Select Role</label>
+
         <select id="role">
-            <option value="developer">Developer</option>
-            <option value="data">Data Science</option>
-            <option value="web">Web Developer</option>
+
+            <option value="developer">
+                Software Developer
+            </option>
+
+            <option value="data">
+                Data Scientist
+            </option>
+
+            <option value="web">
+                Web Developer
+            </option>
+
         </select>
 
         <label>Upload Resume</label>
-        <input type="file" id="file" accept="application/pdf">
 
-        <button onclick="analyzeResume()">🚀 Analyze</button>
-        <button onclick="downloadReport()">📄 Download PDF</button>
+        <input
+        type="file"
+        id="file"
+        accept="application/pdf">
+
+        <button onclick="analyzeResume()">
+            🚀 Analyze Resume
+        </button>
+
+        <button onclick="downloadReport()">
+            📄 Download Report
+        </button>
 
         <br><br>
-        <a href="/logout" style="color:#aaa;">Logout</a>
+
+        <a href="/logout">
+            Logout
+        </a>
+
     </div>
 
-    <!-- 🔹 MAIN CONTENT -->
+    <!-- MAIN -->
+
     <div class="main">
 
-        <!-- Resume Preview -->
+        <!-- HERO -->
+
+        <div class="hero">
+
+            <h1>
+                Smart AI Resume Analyzer
+            </h1>
+
+            <p>
+                AI-powered Resume Intelligence Platform
+                for ATS analysis, skill-gap detection,
+                anomaly detection, interview preparation,
+                and career recommendations.
+            </p>
+
+        </div>
+
+        <!-- KPI CARDS -->
+
+        <div class="stats">
+
+            <div class="card">
+                <h2 id="scoreCard">0%</h2>
+                <p>Resume Score</p>
+            </div>
+
+            <div class="card">
+                <h2 id="atsCard">0%</h2>
+                <p>ATS Score</p>
+            </div>
+
+            <div class="card">
+                <h2 id="gradeCard">-</h2>
+                <p>Grade</p>
+            </div>
+
+            <div class="card">
+                <h2 id="skillCount">0</h2>
+                <p>Skills Found</p>
+            </div>
+
+        </div>
+
+        <!-- PREVIEW -->
+
         <div class="preview">
+
             <iframe id="preview"></iframe>
+
         </div>
 
-        <!-- Output -->
+        <!-- RESULTS -->
+
         <div id="output" class="output">
-            <h3>📊 Results will appear here</h3>
+
+            <h3>
+                Upload a resume and click Analyze
+            </h3>
+
+            <p>
+                Resume intelligence insights
+                will appear here.
+            </p>
+
         </div>
 
-        <!-- History -->
-        <div class="history">
-            <h3>📈 Score History</h3>
-            <canvas id="historyChart"></canvas>
+        <!-- ANALYTICS -->
+
+        <div class="charts">
+
+            <div class="chart-card">
+
+                <h3>
+                    Skill Match Analytics
+                </h3>
+
+                <canvas id="skillChart"></canvas>
+
+            </div>
+
+            <div class="chart-card">
+
+                <h3>
+                    Score History
+                </h3>
+
+                <canvas id="historyChart"></canvas>
+
+            </div>
+
         </div>
+
+        <footer>
+
+            <br><br>
+
+            Developed by
+            <strong>Amrutha Pithani</strong>
+
+            <br>
+
+            AI Resume Intelligence Platform
+
+        </footer>
 
     </div>
 
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- SCORE HISTORY CHART -->
 
-<!-- JS -->
-<script src="{{ url_for('static', filename='script.js') }}"></script>
-
-<!-- Chart Script -->
 <script>
-    const scores = {{ scores | tojson }};
 
-    if (scores.length > 0) {
-        const ctx = document.getElementById('historyChart').getContext('2d');
+const scores =
+{{ scores | tojson }};
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: scores.map((_, i) => "Attempt " + (i + 1)),
-                datasets: [{
-                    label: 'Score Trend',
-                    data: scores,
-                    borderColor: '#22c55e',
-                    backgroundColor: 'rgba(34,197,94,0.2)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            }
-        });
-    }
+if(scores.length > 0){
+
+const ctx =
+document
+.getElementById("historyChart")
+.getContext("2d");
+
+new Chart(ctx,{
+
+type:"line",
+
+data:{
+
+labels:
+scores.map(
+(_,i)=>`Attempt ${i+1}`
+),
+
+datasets:[{
+
+label:"Score Trend",
+
+data:scores,
+
+borderColor:"#2563eb",
+
+backgroundColor:
+"rgba(37,99,235,0.1)",
+
+fill:true,
+
+tension:0.4
+
+}]
+
+}
+
+});
+
+}
+
+</script>
+
+<script
+src="{{ url_for('static',
+filename='script.js') }}">
 </script>
 
 </body>
+
 </html>
