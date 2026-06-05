@@ -1,30 +1,119 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Login</title>
-  <link rel="stylesheet" href="/static/style.css">
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Login | Smart AI Resume Analyzer</title>
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
 </head>
+
 <body>
 
 <div class="app">
-  <h2>🔐 Login</h2>
 
-  {% if msg %}
-    <div class="success">{{ msg }}</div>
-  {% endif %}
+    <div style="text-align:center">
 
-  {% if error %}
-    <div class="error">{{ error }}</div>
-  {% endif %}
+        <div style="font-size:60px;">
+            🧠
+        </div>
 
-  <form method="POST">
-    <input name="username" placeholder="Username" required>
-    <input name="password" type="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-  </form>
+        <h2>
+            Smart AI Resume Analyzer
+        </h2>
 
-  <p>New user? <a href="/register">Register</a></p>
+        <p style="
+        color:#64748b;
+        margin-bottom:25px;
+        ">
+        AI-Powered Resume Intelligence Platform
+        </p>
+
+    </div>
+
+    <div style="
+    background:#eff6ff;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:20px;
+    ">
+
+        <strong>Demo Account</strong>
+
+        <br>
+
+        Username: demo
+
+        <br>
+
+        Password: demo123
+
+    </div>
+
+    {% if msg %}
+    <div class="success">
+        {{ msg }}
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="error">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST">
+
+        <input
+        name="username"
+        placeholder="Username"
+        required>
+
+        <input
+        name="password"
+        type="password"
+        placeholder="Password"
+        required>
+
+        <button type="submit">
+
+            Login
+
+        </button>
+
+    </form>
+
+    <p>
+
+        New User?
+
+        <a href="/register">
+
+            Create Account
+
+        </a>
+
+    </p>
+
 </div>
 
 </body>
+
 </html>
