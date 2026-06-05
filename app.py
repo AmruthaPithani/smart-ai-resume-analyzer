@@ -149,13 +149,17 @@ def generate_interview_questions(found):
 
     for skill in found:
 
-        questions.append(
-            f"Explain a project where you used {skill}."
-        )
+        questions.extend([
 
-        questions.append(
-            f"What challenges did you face while using {skill}?"
-        )
+            f"Explain a project where you used {skill}.",
+
+            f"What are the advantages of {skill}?",
+
+            f"What challenges did you face while using {skill}?",
+
+            f"How would you optimize performance when working with {skill}?"
+
+        ])
 
     return questions[:8]
 # ---------------- Anomoly Detection ----------------
@@ -180,6 +184,81 @@ def detect_anomalies(text):
         )
 
     return alerts
+
+# ---------------- JOB DESCRIPTION MATCH ----------------
+
+def calculate_jd_match(text, job_description):
+
+    if not job_description.strip():
+        return 0, [], []
+
+    resume_words = set(text.lower().split())
+    jd_words = set(job_description.lower().split())
+
+    matched = list(resume_words.intersection(jd_words))
+    missing = list(jd_words - resume_words)
+
+    score = int(
+        len(matched) /
+        max(1, len(jd_words))
+        * 100
+    )
+
+    return score, matched[:10], missing[:10]
+
+
+# ---------------- ROLE PREDICTION ----------------
+
+def predict_role(text):
+
+    text = text.lower()
+
+    dev = sum(skill in text for skill in roles["developer"])
+    data = sum(skill in text for skill in roles["data"])
+    web = sum(skill in text for skill in roles["web"])
+
+    scores = {
+        "Software Developer": dev,
+        "Data Scientist": data,
+        "Web Developer": web
+    }
+
+    predicted = max(scores, key=scores.get)
+
+    max_score = max(scores.values())
+    if max_score == 0:
+        confidence = 0
+    else:
+        confidence = int(
+        scores[predicted] /
+        max_score * 100
+        )
+
+    return predicted, confidence
+
+
+# ---------------- SECTION DETECTION ----------------
+
+def detect_sections(text):
+
+    return {
+
+        "Education":
+        "education" in text,
+
+        "Skills":
+        "skills" in text,
+
+        "Projects":
+        "project" in text,
+
+        "Experience":
+        "experience" in text,
+
+        "Certifications":
+        "certification" in text
+
+    }
 
 
 # ---------------- GRADE ----------------
@@ -264,6 +343,7 @@ def analyze():
 
         file = request.files.get("file")
         role = request.form.get("role", "").lower()
+        job_description = request.form.get( "job_description","")
 
         if not file:
             return jsonify({"error": "Upload file"}), 400
@@ -283,6 +363,10 @@ def analyze():
         suggestion = generate_ai_suggestions(text, role, missing)
         questions = generate_interview_questions(found)
         alerts = detect_anomalies(text)
+        jd_score, jd_matched, jd_missing = calculate_jd_match(text,job_description)
+        predicted_role, prediction_confidence = predict_role(text)
+        sections = detect_sections(text)
+        ai_confidence = min(95,score + 10)
 
         conn = sqlite3.connect("users.db")
         c = conn.cursor()
@@ -293,16 +377,23 @@ def analyze():
         conn.commit()
         conn.close()
 
-        return jsonify({
-            "score": score,
-            "ats": ats,
-            "grade": grade,
-            "found": found,
-            "missing": missing,
-            "suggestion": suggestion,
-            "questions": questions,
-            "alerts": alerts
-        })
+       return jsonify({
+           "score": score,
+           "ats": ats,
+           "grade": grade,
+           "found": found,
+           "missing": missing,
+           "suggestion": suggestion,
+           "questions": questions,
+           "alerts": alerts,
+           "jd_score": jd_score,
+           "jd_matched": jd_matched,
+           "jd_missing": jd_missing,
+           "predicted_role": predicted_role,
+           "prediction_confidence": prediction_confidence,
+           "sections": sections,
+           "ai_confidence": ai_confidence
+       })
 
     except Exception as e:
         print("🔥 ERROR:", e)
@@ -316,15 +407,49 @@ def download():
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer)
     styles = getSampleStyleSheet()
-
     content = [
-        Paragraph("Resume Report", styles["Title"]),
-        Paragraph(f"Score: {data['score']}%", styles["Normal"]),
-        Paragraph(f"ATS: {data['ats']}%", styles["Normal"]),
-        Paragraph(f"Grade: {data['grade']}", styles["Normal"]),
-        Paragraph(f"Found: {', '.join(data['found'])}", styles["Normal"]),
-        Paragraph(f"Missing: {', '.join(data['missing'])}", styles["Normal"]),
-    ]
+
+    Paragraph(
+        "Resume Intelligence Report",
+        styles["Title"]
+    ),
+
+    Paragraph(
+        f"Resume Score: {data['score']}%",
+        styles["Normal"]
+    ),
+
+    Paragraph(
+        f"ATS Score: {data['ats']}%",
+        styles["Normal"]
+    ),
+
+    Paragraph(
+        f"Grade: {data['grade']}",
+        styles["Normal"]
+    ),
+
+    Paragraph(
+        f"Matched Skills: {', '.join(data['found'])}",
+        styles["Normal"]
+    ),
+
+    Paragraph(
+        f"Missing Skills: {', '.join(data['missing'])}",
+        styles["Normal"]
+    ),
+
+    Paragraph(
+        "AI Recommendations",
+        styles["Heading2"]
+    ),
+
+    Paragraph(
+        data["suggestion"],
+        styles["Normal"]
+    )
+
+]
 
     doc.build(content)
     buffer.seek(0)
