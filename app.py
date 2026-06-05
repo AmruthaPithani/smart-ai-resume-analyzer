@@ -284,7 +284,7 @@ def analyze():
             "grade": grade,
             "found": found,
             "missing": missing,
-            "suggestion": suggestion
+            "suggestion": suggestion,
             "questions": questions,
             "alerts": alerts
         })
