@@ -8,11 +8,11 @@ document.getElementById("file").onchange = function () {
 
     const file = this.files[0];
 
-    if(file){
+    if (file) {
 
         document
-        .getElementById("preview")
-        .src = URL.createObjectURL(file);
+            .getElementById("preview")
+            .src = URL.createObjectURL(file);
 
     }
 
@@ -20,70 +20,74 @@ document.getElementById("file").onchange = function () {
 
 // ---------------- ANALYZE ----------------
 
-async function analyzeResume(){
+async function analyzeResume() {
 
     const file =
-    document.getElementById("file").files[0];
+        document.getElementById("file").files[0];
 
     const role =
-    document.getElementById("role").value;
+        document.getElementById("role").value;
 
-    if(!file){
+    if (!file) {
 
         alert("Please upload a resume.");
-
         return;
+
     }
 
     const btn =
-    document.querySelector(".sidebar button");
+        document.querySelector(".sidebar button");
 
     btn.disabled = true;
-
     btn.innerText = "Analyzing...";
 
     document.getElementById("output").innerHTML = `
-    
+
     <div class="result-card">
-    
-    <h3>🤖 AI Analysis In Progress</h3>
-    
-    <p>
-    Extracting resume data...
-    Matching skills...
-    Calculating ATS score...
-    Generating recommendations...
-    </p>
-    
+
+        <h3>🤖 AI Analysis In Progress</h3>
+
+        <p>
+
+        Extracting resume data...
+        Matching skills...
+        Calculating ATS score...
+        Generating recommendations...
+
+        </p>
+
     </div>
-    
+
     `;
 
-    try{
+    try {
 
         let fd = new FormData();
 
         fd.append("file", file);
-
         fd.append("role", role);
 
-        fd.append("job_description",document.getElementById("jobDescription").value);
+        fd.append(
+            "job_description",
+            document.getElementById(
+                "jobDescription"
+            ).value
+        );
 
         let res = await fetch("/analyze", {
 
-            method:"POST",
-
-            body:fd
+            method: "POST",
+            body: fd
 
         });
 
         let data = await res.json();
 
-        if(!res.ok){
+        if (!res.ok) {
 
             alert(data.error);
-
             return;
+
         }
 
         lastData = data;
@@ -91,312 +95,414 @@ async function analyzeResume(){
         // ---------------- KPI CARDS ----------------
 
         document
-        .getElementById("scoreCard")
-        .innerText =
-        data.score + "%";
+            .getElementById("scoreCard")
+            .innerText =
+            data.score + "%";
 
         document
-        .getElementById("atsCard")
-        .innerText =
-        data.ats + "%";
+            .getElementById("atsCard")
+            .innerText =
+            data.ats + "%";
 
         document
-        .getElementById("gradeCard")
-        .innerText =
-        data.grade;
+            .getElementById("gradeCard")
+            .innerText =
+            data.grade;
 
-        document
-        .getElementById("skillCount")
-        .innerText =
-        data.found.length+"%";
+        const aiCard =
+            document.getElementById("aiCard");
+
+        if (aiCard) {
+
+            aiCard.innerText =
+                (data.ai_confidence || 0) + "%";
+
+        }
 
         // ---------------- SKILLS ----------------
 
         const foundSkills =
-        data.found
-        .map(skill =>
-        `<span class="skill found">${skill}</span>`)
-        .join("");
+            (data.found || [])
+                .map(skill =>
+                    `<span class="skill found">${skill}</span>`
+                )
+                .join("");
 
         const missingSkills =
-        data.missing
-        .map(skill =>
-        `<span class="skill missing">${skill}</span>`)
-        .join("");
+            (data.missing || [])
+                .map(skill =>
+                    `<span class="skill missing">${skill}</span>`
+                )
+                .join("");
 
         // ---------------- QUESTIONS ----------------
 
         const questionsHtml =
-        (data.questions || [])
-        .map(q =>
-        `<li>${q}</li>`)
-        .join("");
+            (data.questions || [])
+                .map(q =>
+                    `<li>${q}</li>`
+                )
+                .join("");
 
         // ---------------- ALERTS ----------------
 
         const alertsHtml =
-        (data.alerts || [])
-        .map(a =>
-        `<li>${a}</li>`)
-        .join("");
-        // ---------------- RESUME SECTION ANALYSIS ----------------
+            (data.alerts || [])
+                .map(a =>
+                    `<li>${a}</li>`
+                )
+                .join("");
+
+        // ---------------- SECTIONS ----------------
+
         const sectionsHtml =
             Object.entries(
                 data.sections || {}
             )
-            .map(
-                ([name,status]) =>
-                    `<li>${status ? "✅" : "❌"}${name}</li>`
-            )
-            .join("");
-
+                .map(
+                    ([name, status]) =>
+                        `<li>${status ? "✅" : "❌"} ${name}</li>`
+                )
+                .join("");
 
         // ---------------- OUTPUT ----------------
 
         document.getElementById("output").innerHTML = `
+
         <div class="result-card">
-        <h3>📊 Resume Analysis Summary</h3>
-        <p>Resume Score:<strong>${data.score}%</strong></p>
-        <p>ATS Score:<strong>${data.ats}%</strong></p>
-        <p>Grade:<strong>${data.grade}</strong></p>
+
+            <h3>📊 Resume Analysis Summary</h3>
+
+            <p>
+                Resume Score:
+                <strong>${data.score}%</strong>
+            </p>
+
+            <p>
+                ATS Score:
+                <strong>${data.ats}%</strong>
+            </p>
+
+            <p>
+                Grade:
+                <strong>${data.grade}</strong>
+            </p>
+
         </div>
+
         <div class="result-card">
-        <h3>🤖 AI Role Prediction</h3>
-        <p>Predicted Role:<strong>${data.predicted_role || "Not Available"}</strong></p>
-        <p>Confidence:${data.prediction_confidence || 0}%</p>
+
+            <h3>🤖 AI Role Prediction</h3>
+
+            <p>
+                Predicted Role:
+                <strong>
+                ${data.predicted_role || "Not Available"}
+                </strong>
+            </p>
+
+            <p>
+                Confidence:
+                ${data.prediction_confidence || 0}%
+            </p>
+
         </div>
+
         <div class="result-card">
-        <h3>🎯 Job Description Match</h3>
-        <p>Match Score:<strong>${data.jd_score || 0}%</strong></p>
-        <p>Matched Keywords:${(data.jd_matched || []).join(", ") || "None"}</p>
-        <p>Missing Keywords:${(data.jd_missing || []).join(", ") || "None"}</p>
+
+            <h3>🎯 Job Description Match</h3>
+
+            <p>
+                Match Score:
+                <strong>
+                ${data.jd_score || 0}%
+                </strong>
+            </p>
+
+            <p>
+                Matched Keywords:
+                ${(data.jd_matched || []).join(", ") || "None"}
+            </p>
+
+            <p>
+                Missing Keywords:
+                ${(data.jd_missing || []).join(", ") || "None"}
+            </p>
+
         </div>
+
         <div class="result-card">
-        <h3>✅ Matched Skills</h3>
-        <div>${foundSkills}</div>
+
+            <h3>✅ Matched Skills</h3>
+
+            <div>
+                ${foundSkills}
+            </div>
+
         </div>
+
         <div class="result-card">
-        <h3>❌ Missing Skills</h3>
-        <div>${missingSkills}</div>
+
+            <h3>❌ Missing Skills</h3>
+
+            <div>
+                ${missingSkills}
+            </div>
+
         </div>
+
         <div class="result-card">
-        <h3>🧠 AI Recommendations</h3>
-        <p>${data.suggestion.replace(/\n/g,"<br>")}</p>
+
+            <h3>🧠 AI Recommendations</h3>
+
+            <p>
+                ${(data.suggestion || "")
+                    .replace(/\n/g, "<br>")}
+            </p>
+
         </div>
+
         <div class="result-card">
-        <h3>🎤 Interview Questions</h3>
-        <ul>${questionsHtml}</ul>
+
+            <h3>🎤 Interview Questions</h3>
+
+            <ul>
+                ${questionsHtml}
+            </ul>
+
         </div>
+
         <div class="result-card">
-        <h3>Resume Anomaly Detection</h3>
-        <ul>${
-            alertsHtml ||
-            "<li>No major issues detected.</li>"
-        }
-        </ul>
+
+            <h3>🚨 Resume Anomaly Detection</h3>
+
+            <ul>
+                ${
+                    alertsHtml ||
+                    "<li>No major issues detected.</li>"
+                }
+            </ul>
+
         </div>
+
         <div class="result-card">
-        <h3>📋 Resume Section Analysis</h3>
-        <ul>${sectionsHtml || "<li>No section data available</li>"}</ul>
+
+            <h3>📋 Resume Section Analysis</h3>
+
+            <ul>
+                ${
+                    sectionsHtml ||
+                    "<li>No section data available</li>"
+                }
+            </ul>
+
         </div>
-        
-        // ---------------- CHART ----------------
+
+        `;
+
+        // ---------------- CHARTS ----------------
 
         createSkillChart(
-            data.found.length,
-            data.missing.length
+            (data.found || []).length,
+            (data.missing || []).length
         );
+
         createRadarChart(data);
 
     }
 
-    catch(err){
+    catch (err) {
 
         console.log(err);
 
-        alert("Something went wrong.");
+        alert(
+            "Something went wrong."
+        );
 
     }
 
-    finally{
+    finally {
 
         btn.disabled = false;
 
         btn.innerText =
-        "🚀 Analyze Resume";
+            "🚀 Analyze Resume";
+
     }
 
 }
 
 // ---------------- SKILL CHART ----------------
 
-function createSkillChart(found, missing){
+function createSkillChart(found, missing) {
 
     const ctx =
-    document
-    .getElementById("skillChart");
+        document.getElementById(
+            "skillChart"
+        );
 
-    if(skillChart){
+    if (!ctx) return;
+
+    if (skillChart) {
 
         skillChart.destroy();
 
     }
 
-    skillChart = new Chart(ctx,{
+    skillChart =
+        new Chart(ctx, {
 
-        type:"doughnut",
+            type: "doughnut",
 
-        data:{
+            data: {
 
-            labels:[
-                "Matched Skills",
-                "Missing Skills"
-            ],
-
-            datasets:[{
-
-                data:[
-                    found,
-                    missing
+                labels: [
+                    "Matched Skills",
+                    "Missing Skills"
                 ],
 
-                backgroundColor:[
-                    "#22c55e",
-                    "#ef4444"
-                ]
+                datasets: [{
 
-            }]
+                    data: [
+                        found,
+                        missing
+                    ],
 
-        },
+                    backgroundColor: [
+                        "#22c55e",
+                        "#ef4444"
+                    ]
 
-        options:{
+                }]
 
-            responsive:true,
+            },
 
-            plugins:{
+            options: {
 
-                legend:{
-                    position:"bottom"
+                responsive: true,
+
+                plugins: {
+
+                    legend: {
+                        position: "bottom"
+                    }
+
                 }
 
             }
 
-        }
-
-    });
+        });
 
 }
+
 // ---------------- RADAR CHART ----------------
-function createRadarChart(data){
+
+function createRadarChart(data) {
 
     const ctx =
-    document.getElementById(
-        "radarChart"
-    );
+        document.getElementById(
+            "radarChart"
+        );
 
-    if(!ctx) return;
+    if (!ctx) return;
 
-    if(radarChart){
+    if (radarChart) {
 
         radarChart.destroy();
 
     }
 
     radarChart =
-    new Chart(ctx,{
+        new Chart(ctx, {
 
-        type:"radar",
+            type: "radar",
 
-        data:{
+            data: {
 
-            labels:[
+                labels: [
 
-                "Skills",
+                    "Skills",
+                    "Projects",
+                    "Experience",
+                    "ATS",
+                    "Resume Score"
 
-                "Projects",
+                ],
 
-                "Experience",
+                datasets: [{
 
-                "ATS",
+                    label:
+                        "Resume Strength",
 
-                "Resume Score"
+                    data: [
 
-            ],
+                        data.score || 0,
+                        75,
+                        70,
+                        data.ats || 0,
+                        data.score || 0
 
-            datasets:[{
+                    ]
 
-                label:
-                "Resume Strength",
+                }]
 
-                data:[
+            },
 
-                    data.score,
+            options: {
 
-                    75,
+                responsive: true
 
-                    70,
+            }
 
-                    data.ats,
-
-                    data.score
-
-                ]
-
-            }]
-
-        },
-
-        options:{
-
-            responsive:true
-
-        }
-
-    });
+        });
 
 }
 
 // ---------------- DOWNLOAD REPORT ----------------
 
-async function downloadReport(){
+async function downloadReport() {
 
-    if(!lastData){
+    if (!lastData) {
 
         alert(
             "Analyze a resume first."
         );
 
         return;
+
     }
 
     let res =
-    await fetch("/download",{
+        await fetch("/download", {
 
-        method:"POST",
+            method: "POST",
 
-        headers:{
+            headers: {
 
-            "Content-Type":
-            "application/json"
+                "Content-Type":
+                    "application/json"
 
-        },
+            },
 
-        body:
-        JSON.stringify(lastData)
+            body:
+                JSON.stringify(
+                    lastData
+                )
 
-    });
+        });
 
     let blob =
-    await res.blob();
+        await res.blob();
 
     let a =
-    document.createElement("a");
+        document.createElement("a");
 
     a.href =
-    URL.createObjectURL(blob);
+        URL.createObjectURL(blob);
 
     a.download =
-    "resume_report.pdf";
+        "resume_report.pdf";
 
     a.click();
+
 }
