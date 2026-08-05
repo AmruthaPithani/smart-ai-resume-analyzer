@@ -8,8 +8,6 @@ Smart AI Resume Analyzer is a full-stack AI-powered web application designed to 
 
 📂 **GitHub Repository:** https://github.com/AmruthaPithani/smart-ai-resume-analyzer
 
-🎥 **Demo Video:** *(Add your YouTube Unlisted Video Link Here)*
-
 > ⚠️ Note: The application is hosted on Render's free tier. The first request may take 30–60 seconds while the server wakes up.
 
 ---
